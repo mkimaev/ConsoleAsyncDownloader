@@ -14,23 +14,24 @@ namespace ConsoleAsyncDownloader
     {
         static void Main(string[] args)
         {
+            //Менюшка для сравления времени
             while (true)
             {
                 Console.WriteLine("Программа для скачивания книги Приключения Тома Сойера\n");
                 string source = "http://www.gutenberg.org/files/74/74-0.txt";
                 MyDownloader download = new MyDownloader();
-                Stopwatch sw = new Stopwatch();
+                Stopwatch sw = new Stopwatch(); //счётчики для замера времени.
                 Stopwatch sw2 = new Stopwatch();
                 Console.WriteLine("нажмите s - для скачивания книги в синхронном режите нажмите");
                 Console.WriteLine("нажмите as - для скачивания в асинхронном режите нажмите");
-                string command = Console.ReadLine().ToLower();
+                string command = Console.ReadLine().ToLower(); //ввод
                 switch (command)
                 {
-                    case "s":
+                    case "s": //синхронный способ
                         Console.ForegroundColor = ConsoleColor.Green;
                         sw.Start();
-                        string book = download.UriDownloadText(source);
-                        using (StreamWriter str = new StreamWriter("Tom_Soyer.txt"))
+                        string book = download.UriDownloadText(source); //качаем
+                        using (StreamWriter str = new StreamWriter("Tom_Soyer.txt")) //пишем в файл, на случай если вздумается прочитать Тома Сойера
                         {
                             str.Write(book);
                             //str.Close();
@@ -38,9 +39,10 @@ namespace ConsoleAsyncDownloader
                         }
                         sw.Stop();
                         Console.WriteLine("Операция UriDownloadText завершена! Длительность: {0} мс\n", sw.Elapsed);
+                        Console.WriteLine("Книга находится в папке проекта в Debug\n");
                         Console.ResetColor();
                         break;
-                    case "as":
+                    case "as": //асинхронный способ
                         Console.ForegroundColor = ConsoleColor.DarkGreen;
                         sw2.Start();
                         Task<string> anytask = download.UriDownloadTextAsync(source);
@@ -52,6 +54,7 @@ namespace ConsoleAsyncDownloader
                         }
                         sw2.Stop();
                         Console.WriteLine("Операция UriDownloadTextAsync завершена! Длительность: {0} мс\n", sw2.Elapsed);
+                        Console.WriteLine("Книга находится в папке проекта в Debug\n");
                         Console.ResetColor();
                         break;
                 }
