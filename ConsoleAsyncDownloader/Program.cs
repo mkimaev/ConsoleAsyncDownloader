@@ -14,51 +14,34 @@ namespace ConsoleAsyncDownloader
     {
         static void Main(string[] args)
         {
-            //Менюшка для сравления времени
+            //Менюшка для сравнения времени
             while (true)
             {
-                Console.WriteLine("Программа для скачивания книги Приключения Тома Сойера\n");
-                string source = "http://www.gutenberg.org/files/74/74-0.txt";
+                
+                Console.WriteLine("\nПрограмма для скачивания книги Приключения Тома Сойера\n");
+                //string source = "http://www.gutenberg.org/files/74/74-0.txt"; (ссылка стала длительной, довавил новую)
+                string source = "https://drive.google.com/open?id=0B0szhqOvjWyvYmhOVTBHUHpFWDA";
                 MyDownloader download = new MyDownloader();
-                Stopwatch sw = new Stopwatch(); //счётчики для замера времени.
-                Stopwatch sw2 = new Stopwatch();
-                Console.WriteLine("нажмите s - для скачивания книги в синхронном режите нажмите");
-                Console.WriteLine("нажмите as - для скачивания в асинхронном режите нажмите");
+
+                Console.WriteLine("нажмите s - для скачивания книги в синхронном режите");
+                Console.WriteLine("нажмите as - для скачивания в асинхронном режите");
+                Console.WriteLine("нажмите as-v2 - для скачивания в асинхронном режите (другая версия)");
                 string command = Console.ReadLine().ToLower(); //ввод
                 switch (command)
                 {
                     case "s": //синхронный способ
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        sw.Start();
-                        string book = download.UriDownloadText(source); //качаем
-                        using (StreamWriter str = new StreamWriter("Tom_Soyer.txt")) //пишем в файл, на случай если вздумается прочитать Тома Сойера
-                        {
-                            str.Write(book);
-                            //str.Close();
-                            Console.WriteLine("записано в Tom_Soyer.txt");
-                        }
-                        sw.Stop();
-                        Console.WriteLine("Операция UriDownloadText завершена! Длительность: {0} мс\n", sw.Elapsed);
-                        Console.WriteLine("Книга находится в папке проекта в Debug\n");
-                        Console.ResetColor();
+                        download.UriDownloadText(source);
                         break;
-                    case "as": //асинхронный способ
-                        Console.ForegroundColor = ConsoleColor.DarkGreen;
-                        sw2.Start();
-                        Task<string> anytask = download.UriDownloadTextAsync(source);
-                        string bookAsync = anytask.Result;
-                        using (StreamWriter str2 = new StreamWriter("Tom_SoyerAsync.txt"))
-                        {
-                            str2.Write(bookAsync);
-                            Console.WriteLine("записано в Tom_SoyerAsync.txt");
-                        }
-                        sw2.Stop();
-                        Console.WriteLine("Операция UriDownloadTextAsync завершена! Длительность: {0} мс\n", sw2.Elapsed);
-                        Console.WriteLine("Книга находится в папке проекта в Debug\n");
-                        Console.ResetColor();
+                    case "as": //асинхронный способ c исп.существующего асинхронного метода из класса Webclient
+                        download.UriDownloadTextAsync(source);
+                        break;
+                    case "as-v2": //асинхронный способ v2
+                        download.UriDownloadTextAsyncV2(source);
                         break;
                 }
+                Console.WriteLine("основной поток №({0}) освободился ", Thread.CurrentThread.ManagedThreadId);
             }
+
         }
     }
 }

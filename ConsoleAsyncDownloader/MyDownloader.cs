@@ -12,47 +12,72 @@ namespace ConsoleAsyncDownloader
 {
     class MyDownloader
     {
+        bool isAsync = false; //флаг, чтобы покрасить метод UriDownloadTextAsyncV2
+        Stopwatch sw = new Stopwatch(); //счётчики для замера времени.
+        Stopwatch sw2 = new Stopwatch();
         /// <summary>
         /// синхронный метод скачивания
         /// </summary>
-        public string UriDownloadText(string url)
+        public void UriDownloadText(object url)
         {
+            Console.ForegroundColor = ConsoleColor.Green;
+            if (isAsync)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+            }
+            sw.Start();
+            string adress = (string)url;
             string data = null;
             WebClient wc = new WebClient();
-            for (int i = 0; i < 50; i++) // рисуем точки, чтобы увидеть разницу - будет задержка при скачке
+            Console.WriteLine("Скачивание в потоке ({0})", Thread.CurrentThread.ManagedThreadId);
+            Console.WriteLine("|dowloading...|");
+            data = wc.DownloadString(adress); // метод загрузки
+            Console.WriteLine("Скачивание было в потоке ({0})", Thread.CurrentThread.ManagedThreadId);
+            using (StreamWriter str = new StreamWriter("Tom_Soyer.txt")) //пишем в файл, на случай если вздумается прочитать Тома Сойера
             {
-                Console.Write(".");
-                Thread.Sleep(50);
-                if (i == 25)
-                {
-                    Console.Write("|dowloading...|");
-                    data = wc.DownloadString(url); // метод загрузки
-                    continue;
-                }
+                str.Write(data);
+                Console.WriteLine("записано в Tom_Soyer.txt");
             }
-            return data;
-
+            sw.Stop();
+            Console.WriteLine("\nОперация UriDownloadText завершена! Длительность: {0} мс\n", sw.Elapsed);
+            Console.WriteLine("Книга находится в папке проекта в Debug\n");
+            Console.ResetColor();
         }
 
         /// <summary>
-        /// асинхронный метод скачивания
+        /// асинхронный метод скачивания с исп. метода WebClient.DownloadStringTaskAsync();
         /// </summary>
-        public async Task<string> UriDownloadTextAsync(string url)
+        public async void UriDownloadTextAsync(string url)
         {
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            sw2.Start();
             WebClient wc2 = new WebClient();
-            Task<string> taskAsync = null;
-            for (int i = 0; i < 50; i++)
+            string data2 = null;
+            Console.WriteLine("Скачивание в потоке  ({0})", Thread.CurrentThread.ManagedThreadId);
+            Console.WriteLine("|dowloading...|");
+            data2 = await wc2.DownloadStringTaskAsync(url);
+            Console.WriteLine("Скачивание было в потоке ({0})", Thread.CurrentThread.ManagedThreadId);
+            using (StreamWriter str2 = new StreamWriter("Tom_SoyerAsync.txt"))
             {
-                Console.Write("."); // рисуем точки, чтобы увидеть разницу - задержки не будет
-                Thread.Sleep(50);
-                if (i == 25)
-                {
-                    Console.Write("|dowloading...|(без задержки)");
-                    taskAsync = wc2.DownloadStringTaskAsync(url); // асинхронный метод загрузки
-                    continue;
-                }
+                str2.Write(data2);
+                Console.WriteLine("записано в Tom_SoyerAsync.txt");
             }
-            return await taskAsync; ;
+            sw2.Stop();
+            Console.WriteLine("\nОперация UriDownloadTextAsync завершена! Длительность: {0} мс\n", sw2.Elapsed);
+            Console.WriteLine("Книга находится в папке проекта в Debug\n");
+            Console.ResetColor();
+        }
+
+        /// <summary>
+        /// собственная реализация async/await
+        /// </summary>
+        public async void UriDownloadTextAsyncV2(string url)
+        {
+            isAsync = true;
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("Работа в потоке ({0})", Thread.CurrentThread.ManagedThreadId);
+            await Task.Factory.StartNew(UriDownloadText, url);
+            Console.WriteLine("Скачивание было в потоке ({0})", Thread.CurrentThread.ManagedThreadId);
         }
     }
 }
